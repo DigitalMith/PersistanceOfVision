@@ -1,33 +1,85 @@
-/css
-/extensions
-/installer_files
-/repositories
-/user_data
+# -------------------------
+# Orion — Persistence of Vision
+# Custom .gitignore
+# -------------------------
 
-.chroma
+# JetBrains
+.idea/
+# keep shared run configs in VCS:
+!.run/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+*.ipynb_checkpoints/
+
+# Virtual Environments
+.venv/
+venv/
+env/
+ENV/
+
+# OS / Editor
 .DS_Store
-.eslintrc.js
-.idea
-.installer_state.json
-.venv
-venv
-.envrc
-.direnv
-.vs
-.vscode
-*.bak
-*.ipynb
-*.log
-*pycache*
-cert.pem
-key.pem
-package.json
-package-lock.json
 Thumbs.db
-wandb
+.idea/
+.vscode/
+*.swp
+*.swo
 
-# ignore user docker config and top level links to docker files
-/docker-compose.yaml
-/docker-compose.yml
-/Dockerfile
+# Orion Runtime
+memory/
+chat_logs/
+persona_profiles/
+orion_core/__pycache__/
+orion_core/cache/
+extensions/*/cache/
+extensions/*/temp/
+
+# Models & AI artifacts
+models/
+*.gguf
+*.safetensors
+*.ckpt
+*.pt
+*.bin
+*.onnx
+*.tflite
+
+# Data files (optional keep)
+datasets/
+*.csv
+*.tsv
+*.json
+*.yaml
+*.yml
+*.sqlite
+*.db
+
+# Logs & temp
+logs/
+outputs/
+*.log
+tmp/
+temp/
+cache/
+
+# Node (if using web extensions)
+node_modules/
+extensions/*/node_modules/
+
+# Build artifacts
+build/
+dist/
+*.tmp
+
+# Secrets & configs
 .env
+.env.*
+secrets.env
+config.yaml
+config.json
