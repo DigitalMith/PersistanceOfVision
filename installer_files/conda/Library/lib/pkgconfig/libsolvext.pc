@@ -1,0 +1,9 @@
+libdir=C:/Orion/text-generation-webui/installer_files/conda/Library/lib
+includedir=C:/Orion/text-generation-webui/installer_files/conda/Library/include
+
+Name: libsolvext
+Description: Library for reading repositories
+Version: 0.7.32
+Requires: libsolv
+Libs: -L${libdir} -lsolvext
+Cflags: -I${includedir}

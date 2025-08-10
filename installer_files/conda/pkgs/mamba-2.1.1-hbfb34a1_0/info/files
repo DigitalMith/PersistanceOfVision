@@ -1,0 +1,6 @@
+Library/bin/mamba.exe
+Scripts/activate.bat
+condabin/_mamba_activate.bat
+condabin/activate.bat
+condabin/mamba.bat
+condabin/mamba_hook.bat

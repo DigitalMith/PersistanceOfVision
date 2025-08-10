@@ -1,0 +1,4 @@
+Name: nlohmann_json
+Description: JSON for Modern C++
+Version: 3.11.3
+Cflags: -ID:/bld/nlohmann_json_1723651555814/_h_env/Library/include

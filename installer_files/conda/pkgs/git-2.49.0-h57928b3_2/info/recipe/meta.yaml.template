@@ -1,0 +1,93 @@
+{% set version = "2.49.0" %}
+
+package:
+  name: git
+  version: {{ version }}
+
+source:
+  - url: https://mirrors.edge.kernel.org/pub/software/scm/git/git-{{ version }}.tar.gz  # [not win]
+    folder: code  # [not win]
+    sha256: f8047f572f665bebeb637fd5f14678f31b3ca5d2ff9a18f20bd925bd48f75d3c  # [not win]
+    patches:   # [not win]
+      - 0001-macOS-Do-not-use-the-system-Wish-urgh.patch  # [not win]
+  - url: https://mirrors.edge.kernel.org/pub/software/scm/git/git-manpages-{{ version }}.tar.gz  # [not win]
+    folder: manpages  # [not win]
+    sha256: b561252841ead1e32d87dbec8f257399ea08f759c98df62c3bafa5a658f2f8ac  # [not win]
+  - url: https://mirrors.edge.kernel.org/pub/software/scm/git/git-htmldocs-{{ version }}.tar.gz  # [not win]
+    folder: htmldocs  # [not win]
+    sha256: d5bfd093bf477f6b380e6de45ea3bd5fc251a054cbbe85f5dd43095a8b3ba0a1  # [not win]
+
+  - url: https://github.com/git-for-windows/git/releases/download/v{{ version }}.windows.1/PortableGit-{{ version }}-64-bit.7z.exe  # [win64]
+    folder: .  # [win64]
+    sha256: bc980a64e875304ea5aa88386fda37e8a0089d0f2023616b9995b1ca75b471dd  # [win64]
+
+build:
+  number: 2
+  # git hardcodes paths to external utilities (e.g. curl)
+  detect_binary_files_with_prefix: true
+  ignore_run_exports_from:
+    - perl 5.*  # [unix]
+
+requirements:
+  build:
+    - {{ stdlib('c') }}    # [unix]
+    - {{ compiler('c') }}  # [unix]
+    - {{ stdlib("c") }}    # [unix]
+    - autoconf  # [unix]
+    - make      # [unix]
+    - 7za       # [win]
+    - tk        # [unix]
+    - gettext-tools   # [unix]
+  host:
+    - libintl-devel  # [osx]
+    - libcurl        # [unix]
+    - expat          # [unix]
+    - libiconv       # [unix]
+    - openssl        # [unix]
+    - pcre2          # [unix]
+    - perl 5.*       # [unix]
+    - zlib           # [unix]
+  run:
+    # Without the explicit dependency on curl, it seems
+    # that linux_64 fails on the symbol lookup for curl_global_sslset
+    - perl 5.*  # [unix]
+
+test:
+  commands:
+    # Verify git location.
+    - test -f $PREFIX/bin/git                               # [unix]
+    - test -f $PREFIX/bin/gitk                              # [unix]
+    - test -f $PREFIX/bin/git-credential-osxkeychain        # [osx]
+    - if not exist %LIBRARY_PREFIX%\\bin\\git.exe exit 1    # [win]
+
+    # Run git commands.
+    - git --version
+    - git clone https://github.com/conda-forge/git-feedstock
+
+    # Git credential commands
+    - git-credential-osxkeychain 2>&1 | grep -q usage  # [osx]
+
+    # test completions
+    - bash $PREFIX/share/bash-completion/completions/git  # [unix]
+
+    # confirm toplevel manpage
+    - test -f $PREFIX/man/man1/git.1  # [not win]
+    - test -f $PREFIX/share/man/man1/git.1  # [osx]
+
+    # confirm toplevel html doc page
+    - test -f $PREFIX/share/doc/git/index.html  # [not win]
+
+about:
+  home: https://git-scm.com/
+  license: GPL-2.0-or-later and LGPL-2.1-or-later
+  license_file: code/COPYING  # [not win]
+  summary: distributed version control system
+
+extra:
+  recipe-maintainers:
+    - jakirkham
+    - msarahan
+    - pelson
+    - scopatz
+    - ocefpaf
+    - djsutherland

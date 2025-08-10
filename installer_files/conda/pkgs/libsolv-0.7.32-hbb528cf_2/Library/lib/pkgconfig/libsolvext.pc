@@ -1,0 +1,9 @@
+libdir=D:/bld/libsolv-split_1745506854766/_h_env/Library/lib
+includedir=D:/bld/libsolv-split_1745506854766/_h_env/Library/include
+
+Name: libsolvext
+Description: Library for reading repositories
+Version: 0.7.32
+Requires: libsolv
+Libs: -L${libdir} -lsolvext
+Cflags: -I${includedir}

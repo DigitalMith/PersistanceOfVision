@@ -1,0 +1,11 @@
+prefix=C:/Orion/text-generation-webui/installer_files/conda/Library 
+exec_prefix=C:/Orion/text-generation-webui/installer_files/conda/Library 
+libdir=C:/Orion/text-generation-webui/installer_files/conda/Library/lib 
+includedir=C:/Orion/text-generation-webui/installer_files/conda/Library/include 
+modules=0 
+Name: libXML 
+Version: 2.13.8 
+Description: libXML library version2. 
+Requires: 
+Libs: -LC:/Orion/text-generation-webui/installer_files/conda/Library/lib -lxml2 -liconv -lz 
+Cflags: -IC:/Orion/text-generation-webui/installer_files/conda/Library/include/libxml2 -IC:/Orion/text-generation-webui/installer_files/conda/Library/include 

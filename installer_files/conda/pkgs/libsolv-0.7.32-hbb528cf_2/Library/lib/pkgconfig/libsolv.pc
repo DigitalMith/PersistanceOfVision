@@ -1,0 +1,8 @@
+libdir=D:/bld/libsolv-split_1745506854766/_h_env/Library/lib
+includedir=D:/bld/libsolv-split_1745506854766/_h_env/Library/include
+
+Name: libsolv
+Description: Library for solving packages
+Version: 0.7.32
+Libs: -L${libdir} -lsolv
+Cflags: -I${includedir}

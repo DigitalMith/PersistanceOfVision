@@ -1,0 +1,11 @@
+prefix=D:/bld/fmt_1742833178966/_h_env/Library
+exec_prefix=D:/bld/fmt_1742833178966/_h_env/Library
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: fmt
+Description: A modern formatting library
+Version: 11.1.4
+Libs: -L${libdir} -lfmt
+Cflags: -I${includedir}
+
