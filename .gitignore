@@ -1,85 +1,28 @@
-# -------------------------
-# Orion — Persistence of Vision
-# Custom .gitignore
-# -------------------------
-
-# JetBrains
-.idea/
-# keep shared run configs in VCS:
-!.run/
-
-# Python
+# Ignore user data, binaries, backups, and temp files
+*.sqlite3
+*.dll
+*.exe
+*.zip
+*.tar
+*.tar.gz
+*.7z
+*.rar
+*.log
+*.tmp
+*.pyc
 __pycache__/
-*.py[cod]
-*.pyo
-*.pyd
-*.so
-*.egg-info/
-*.ipynb_checkpoints/
-
-# Virtual Environments
-.venv/
-venv/
-env/
-ENV/
-
-# OS / Editor
 .DS_Store
 Thumbs.db
-.idea/
+.installer_state.json
+
+# VSCode & PyCharm
 .vscode/
-*.swp
-*.swo
+.idea/
 
-# Orion Runtime
-memory/
-chat_logs/
-persona_profiles/
-orion_core/__pycache__/
-orion_core/cache/
-extensions/*/cache/
-extensions/*/temp/
-
-# Models & AI artifacts
-models/
-*.gguf
-*.safetensors
-*.ckpt
-*.pt
-*.bin
-*.onnx
-*.tflite
-
-# Data files (optional keep)
-datasets/
-*.csv
-*.tsv
-*.json
-*.yaml
-*.yml
-*.sqlite
-*.db
-
-# Logs & temp
-logs/
+# Local data and output
+user_data/
 outputs/
-*.log
-tmp/
-temp/
-cache/
-
-# Node (if using web extensions)
-node_modules/
-extensions/*/node_modules/
-
-# Build artifacts
-build/
-dist/
-*.tmp
-
-# Secrets & configs
-.env
-.env.*
-secrets.env
-config.yaml
-config.json
+installer_files/
+models/
+extensions/
+characters/
