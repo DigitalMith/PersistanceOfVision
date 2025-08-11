@@ -49,7 +49,7 @@ Orion ships with a **portable Python environment** in
 ```
 installer_files/env
 ```
-used by `orion_up.bat`. This ensures correct dependencies for  
+used by `start_orion.bat`. This ensures correct dependencies for  
 `text-generation-webui` and **ChromaDB** integration without  
 interfering with your system Python.
 
