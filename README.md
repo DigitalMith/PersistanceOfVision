@@ -41,6 +41,51 @@ Whether you’re building autonomous memory agents, embedding structured knowled
 
 ---
 
+
+
+## 🚀 Quick Start (Portable Orion Environment)
+
+Orion ships with a **portable Python environment** in  
+```
+installer_files/env
+```
+used by `orion_up.bat`. This ensures correct dependencies for  
+`text-generation-webui` and **ChromaDB** integration without  
+interfering with your system Python.
+
+### 1. Launch Orion
+From the repo root:
+```bat
+orion_up.bat
+```
+This script:
+- Runs a **preflight check** to ensure required ChromaDB collections exist:
+  - `orion_persona_ltm`
+  - `orion_episodic_ltm`
+- Starts `text-generation-webui` with the portable Python.
+
+### 2. Persistent ChromaDB Storage
+ChromaDB data is stored at:
+```
+user_data/chroma_db
+```
+This folder is **git-ignored** so it remains local.
+
+### 3. Freezing & Restoring the Environment
+The current environment packages are in:
+```
+requirements-freeze.txt
+```
+To recreate the same environment later:
+```powershell
+# From repo root
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements-freeze.txt
+```
+Or point your TGWUI portable environment at this file to match versions.
+
+
 ## 📦 Installation
 
 ```bash
