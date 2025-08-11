@@ -1,0 +1,28 @@
+[project]
+name = "orion"
+version = "2.0.11"
+description = "Orion: Persistence of Vision AI module"
+authors = [{ name="DigitalMith", email="you@example.com" }]
+readme = "README.md"
+requires-python = ">=3.11"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+packages = ["orion"]
+
+[tool.black]
+line-length = 100
+target-version = ["py311"]
+
+[tool.mypy]
+strict = true
+
+[tool.ruff]
+line-length = 100
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.poetry.scripts]
+orion-dev = "orion.core:OrionRuntime"

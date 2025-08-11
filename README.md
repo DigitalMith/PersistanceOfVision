@@ -96,5 +96,37 @@ python -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements-dev.txt
 
+---
 
-A framework built not for models — built for minds with vision.
+## 🧠 Internal Python Package: `orion_perseverance_of_vision`
+
+This repo includes a standalone internal Python module used by Orion for:
+- Reasoning logic
+- Vector memory abstraction
+- Persistent identity handling
+
+### 📁 Location:
+```
+internal/orion_perseverance_of_vision/
+```
+
+### 💻 Local usage:
+To use the internal package from within other Orion modules:
+
+```python
+import orion_perseverance_of_vision as opv
+```
+
+No install required — it's designed to run directly from source inside the repo.
+
+### 📦 Optional editable install (for testing or plugin dev):
+
+```powershell
+.\installer_files\env\python.exe -m pip install -e .\internal\orion_perseverance_of_vision
+```
+
+This enables hot-reloading in Python environments like Jupyter or test harnesses.
+
+---
+
+> 🧬 A framework built not for models — built for minds with vision.

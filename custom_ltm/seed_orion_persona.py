@@ -38,8 +38,8 @@ def load_orion_persona(file_path):
             if "[TONE AND VOICE]" in content else "",
         "MEMORY_HEADER_CORE": content.split("Obtained from memory_header.txt:")[1].split("Obtained from persona_header.txt:")[0].strip()
             if "Obtained from memory_header.txt:" in content else "",
-        "ORION_JSON_CORE": content.split("Obtained from Orion.json:")[1].split("Obtained from memory_header.txt:")[0].strip()
-            if "Obtained from Orion.json:" in content else "",
+        "ORION_JSON_CORE": content.split("Obtained from orion_perseverance_of_vision.json:")[1].split("Obtained from memory_header.txt:")[0].strip()
+            if "Obtained from orion_perseverance_of_vision.json:" in content else "",
     }
 
     for text in sections.values():

@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "orion-perseverance-of-vision"
+version = "0.0.1"
+description = "Orion — Perseverance of Vision: local-first LLM helpers for TGWUI."
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [{ name = "You" }]
+license = { text = "AGPL-3.0" }
+
+[tool.setuptools]
+package-dir = {"" = "."}
+packages = ["orion_perseverance_of_vision"]
