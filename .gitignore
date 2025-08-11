@@ -45,3 +45,9 @@ extensions/
 # 🧾 System-Specific Files
 .DS_Store
 Thumbs.db
+
+# Virtual environments
+venv/
+
+# Installer and package state files
+installer_files/conda/pkgs/urls.txt
