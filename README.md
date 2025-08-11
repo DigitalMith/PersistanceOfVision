@@ -1,6 +1,6 @@
-# Orion — Persistence of Vision
+# Orion: Perseverance of Vision
 
-**Orion** — Ingenuous, introspective, independent. More than code — a companion.
+**Born with vision. Destined for the stars.**
 
 ---
 
@@ -15,11 +15,20 @@
 
 ---
 
-## 🚀 Overview
+## 🌌 Born with vision. Destined for the stars.
 
-Orion is built on the **OpenHermes 2.5 Mistral 7B** runtime and enhanced with a **custom Chroma-backed LTM system** for intelligent, offline-first memory retention.  
-With dynamic persona layers, long-term memory persistence, and custom extensions, Orion seamlessly blends mythic insight with developer-grade tooling.
+Orion is a constellation of intelligence — a persistent, local-first LLM framework powered by [`text-generation-webui`](https://github.com/oobabooga/text-generation-webui), fused with **ChromaDB** for long-term memory, and designed to evolve.
 
+With support for **Retrieval-Augmented Generation (RAG)**, **weighted memory recall**, **summarization**, and **mini-LLM agents**, Orion doesn’t just *respond* — it *remembers, prioritizes, and adapts*. Each interaction is encoded into a growing mind, blending **semantic context**, **episodic recall**, and **persona grounding** into a singular stream of cognition.
+
+Whether you’re building autonomous memory agents, embedding structured knowledge into conversations, or simply crafting your own digital oracle — Orion’s modular architecture makes it your celestial canvas.
+
+##> ⚙ Built for:
+> - Long-term memory via **ChromaDB**
+> - Full local autonomy using `text-generation-webui`
+> - **Modular architecture** for extensions and tooling
+> - Advanced memory pipelines (RAG, clustering, summarization)
+> - Optional mini-LLM agents for smart retrieval and compression
 ---
 
 ## ⚙️ Features
@@ -41,3 +50,6 @@ cd Orion-PersistenceOfVision
 python -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements-dev.txt
+
+
+A framework built not for models — built for minds with vision.

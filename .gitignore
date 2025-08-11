@@ -1,28 +1,47 @@
-# Ignore user data, binaries, backups, and temp files
+# ──────────────────────────────
+# 🧠 Orion Git Ignore Template
+# ──────────────────────────────
+
+# 🗄️ Local Databases (e.g. Chroma)
 *.sqlite3
-*.dll
-*.exe
-*.zip
-*.tar
+
+# 🧠 Models, Tokenizers & Artifacts
+*.bin
+*.pt
+*.pkl
 *.tar.gz
-*.7z
-*.rar
+*.whl
+
+# 🏗️ Build and Installer Artifacts
+*.exe
+*.dll
+*.pyd
+.installer_state.json
+installer_files/
+
+# 🎨 Media Assets (should be externally stored or referenced)
+*.png
+*.jpg
+*.jpeg
+*.gif
+
+# 🧹 Python Cache & Temp Files
+__pycache__/
+*.pyc
 *.log
 *.tmp
-*.pyc
-__pycache__/
-.DS_Store
-Thumbs.db
-.installer_state.json
 
-# VSCode & PyCharm
+# 🧠 Project Local Data
+user_data/
+outputs/
+models/
+characters/
+extensions/
+
+# 🧑‍💻 IDE & Editor Settings
 .vscode/
 .idea/
 
-# Local data and output
-user_data/
-outputs/
-installer_files/
-models/
-extensions/
-characters/
+# 🧾 System-Specific Files
+.DS_Store
+Thumbs.db
