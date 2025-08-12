@@ -1,13 +1,29 @@
 @echo off
-REM Use TGWUI's portable Python for both preflight and server
-set PYTHONUTF8=1
-set PYTHONIOENCODING=utf-8
+REM ============================
+REM Orion Startup Script
+REM ============================
 
-cd /d "%~dp0"
+REM Set paths
+set "TGWUI_DIR=C:\Orion\text-generation-webui"
+set "MODEL_NAME=openhermes-2.5-mistral-7b.Q4_K_M.gguf"
+set "MODEL_PATH=%TGWUI_DIR%\user_data\models\%MODEL_NAME%"
 
-REM Step 1: Preflight Chroma
-.\installer_files\env\python.exe orion_preflight.py
+REM Activate TGWUI virtual environment
+CALL "%TGWUI_DIR%\installer_files\conda\Scripts\activate.bat" "%TGWUI_DIR%\installer_files\env"
 
-REM Step 2: Launch TGWUI
-cd text-generation-webui
-..\installer_files\env\python.exe server.py --listen --auto-devices --verbose
+REM Check model exists before launching
+IF NOT EXIST "%MODEL_PATH%" (
+    echo [ERROR] Model file not found at:
+    echo %MODEL_PATH%
+    pause
+    exit /b 1
+)
+
+REM Launch TGWUI with Orion LTM extension and model autoload
+CALL "%TGWUI_DIR%\installer_files\env\python.exe" "%TGWUI_DIR%\server.py" ^
+    --model "%MODEL_NAME%" ^
+    --extensions orion_ltm ^
+    --listen ^
+    --verbose
+
+pause

@@ -51,3 +51,19 @@ venv/
 
 # Installer and package state files
 installer_files/conda/pkgs/urls.txt
+
+# Orion LTM and backups (never commit)
+user_data/chroma_db/
+backups/ltm/
+*.jsonl
+*.sqlite
+# Orion / TGWUI big artifacts
+user_data\models/
+user_data\chroma_db/
+installer_files\env/
+installer_files\conda/
+*.gguf
+*.safetensors
+*.7z
+*.zip
+*.cache/

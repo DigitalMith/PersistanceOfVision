@@ -1,0 +1,44 @@
+version: 1
+toggles:
+  internet_enabled: true
+  store_web_to_ltm: true
+  allow_pdfs: false
+  quarantine_mode: false
+  
+sources:
+  # Optional: keep him focused
+  allowlist:
+    - "*.uhaul.com"
+    - "wikipedia.org"
+    - "docs.python.org"
+    - "*.gov"
+  denylist:
+    - "x.com"
+    - "twitter.com"
+    
+fetch:
+  user_agent: "Orion/1.0 (local)"
+  max_requests_per_hour: 30
+  request_timeout_sec: 20
+  retries: 1
+  robots_txt_respect: true
+  
+crawl:
+  max_depth: 2
+  max_pages: 6
+  same_domain_only: true
+  same_path_preferred: true
+  follow_pdf_links: false
+    
+summarize:
+  max_output_tokens: 700
+dedupe:
+  cosine_threshold: 0.92
+score:
+  weights: {embedding: 0.65, recency: 0.2, source_trust: 0.1, interactions: 0.05}
+ttl_days:
+  news: 30
+  docs: 365
+budgets:
+  daily_new_tokens: 30000
+  per_topic_cap: 200
