@@ -1,17 +1,11 @@
-# seed_episodic_memory.py
-# Ingest chat logs (and optional long_term_memory.json) into ChromaDB episodic LTM.
-
-import os
-import json
-import hashlib
+# Merge episodic seeding (no destructive delete)
+import os, json, hashlib
 from pathlib import Path
-from datetime import datetime
 
 import chromadb
 from chromadb.config import Settings
 from chromadb.utils import embedding_functions
 
-# -------- Paths & config (override via env if needed) --------
 SCRIPT_DIR = Path(__file__).parent
 PROJECT_ROOT = (SCRIPT_DIR / "..").resolve()
 
@@ -20,81 +14,55 @@ CHROMA_DB_PATH = os.getenv("CHROMA_DB_PATH", str(PROJECT_ROOT / "user_data" / "c
 CHAT_DIR = Path(os.getenv("ORION_CHAT_DIR", r"C:\Orion\memory\chat"))
 LONG_TERM_MEMORY_FILE = Path(os.getenv("ORION_LONG_TERM_MEMORY_FILE", r"C:\Orion\memory\long_term_memory.json"))
 
-# One embedding fn (same model as persona seeding)
 EMBED_FN = embedding_functions.SentenceTransformerEmbeddingFunction(
     model_name="all-MiniLM-L6-v2"
 )
 
-def make_id(session_id, role, content, when, counter):
-    h = hashlib.sha1(f"{role}|{content}|{when}".encode("utf-8")).hexdigest()[:12]
-    return f"episodic_{session_id}_{h}_{counter}"
+def make_id(session_id, idx, role, content, when):
+    key = f"{session_id}|{idx:06d}|{role}|{content}|{when}"
+    return "episodic_" + hashlib.sha1(key.encode("utf-8")).hexdigest()[:16]
 
-def get_client() -> chromadb.PersistentClient:
-    """Create a persistent client so data survives reinstalls."""
+def get_client():
     return chromadb.PersistentClient(path=CHROMA_DB_PATH, settings=Settings(anonymized_telemetry=False))
 
-def load_all_episodic():
-    """Build episodic docs from chat logs + optional long_term_memory.json."""
-    docs, ids, metas = [], [], []
-    counter = 0
-
-    def push(role, content, when, session_id, importance="normal", tags=None):
-        nonlocal counter
-        content = (content or "").strip()
-        if not content:
-            return
-        when = str(when or "")
-        role = (role or "unknown").lower()
-        docs.append(f"[{role} at {when}]: {content}")
-        ids.append(make_id(session_id, role, content, when, counter))
-        metas.append({
-            "type": "episodic",
-            "role": role,
-            "timestamp": when,
-            "session_id": session_id,
-            "importance": str(importance),
-            "tags": ", ".join(tags or []),
-        })
-        counter += 1
-
+def iter_turns():
     # 1) Chat transcripts
     if CHAT_DIR.is_dir():
         for f in sorted(CHAT_DIR.glob("*.json")):
             try:
-                raw = f.read_text(encoding="utf-8")
-                data = json.loads(raw)
+                data = json.loads(f.read_text(encoding="utf-8"))
             except Exception as e:
                 print(f"Skipping {f.name}: {e}")
                 continue
-
             session_id = f.stem
             turns = data.get("messages") if isinstance(data, dict) else data
             if not isinstance(turns, list):
                 continue
-
             fallback_time = session_id
-            for t in turns:
-                role = (t.get("role") or t.get("speaker") or "unknown")
-                content = (t.get("content") or t.get("text") or "")
+            for i, t in enumerate(turns):
+                role = (t.get("role") or t.get("speaker") or "unknown").lower()
+                content = (t.get("content") or t.get("text") or "").strip()
                 when = t.get("timestamp") or t.get("time") or fallback_time
-                push(role, content, when, session_id, t.get("importance", "normal"), t.get("tags"))
+                if not content:
+                    continue
+                yield session_id, i, role, content, str(when), "normal", []
+                
 
     # 2) Optional long_term_memory.json
     if LONG_TERM_MEMORY_FILE.is_file():
         try:
-            raw = LONG_TERM_MEMORY_FILE.read_text(encoding="utf-8")
-            data = json.loads(raw)
+            data = json.loads(LONG_TERM_MEMORY_FILE.read_text(encoding="utf-8"))
             turns = data if isinstance(data, list) else data.get("messages", [])
             if isinstance(turns, list):
-                for t in turns:
-                    role = (t.get("role") or t.get("speaker") or "unknown")
-                    content = (t.get("content") or t.get("text") or "")
+                for i, t in enumerate(turns):
+                    role = (t.get("role") or t.get("speaker") or "unknown").lower()
+                    content = (t.get("content") or t.get("text") or "").strip()
                     when = t.get("timestamp") or t.get("time") or "n/a"
-                    push(role, content, when, "long_term_memory", t.get("importance", "normal"), t.get("tags"))
+                    if not content:
+                        continue
+                    yield "long_term_memory", i, role, content, str(when), t.get("importance","normal"), (t.get("tags") or [])
         except Exception as e:
             print(f"Warning reading long_term_memory.json: {e}")
-
-    return docs, ids, metas
 
 def main():
     print(f"Chroma path: {CHROMA_DB_PATH}")
@@ -103,28 +71,38 @@ def main():
 
     client = get_client()
 
-    # Assemble episodic docs
-    docs, ids, metas = load_all_episodic()
-    if not docs:
-        print("No episodic memories found (nothing to add).")
-        return
-
-    # Delete and recreate collection fresh
+    # Get or create collection (NO DELETE)
     try:
-        client.delete_collection(name=EPISODIC_COLLECTION_NAME)
+        episodic = client.get_collection(EPISODIC_COLLECTION_NAME, embedding_function=EMBED_FN)
     except Exception:
-        pass
+        episodic = client.create_collection(EPISODIC_COLLECTION_NAME, embedding_function=EMBED_FN)
 
-    episodic_collection = client.create_collection(
-        name=EPISODIC_COLLECTION_NAME,
-        embedding_function=EMBED_FN,
-    )
+    # Gather existing IDs so we don't duplicate
+    existing = episodic.get(include=["metadatas"])
+    existing_ids = set(existing.get("ids", []) or [])
 
-    # Add to ChromaDB
-    episodic_collection.add(documents=docs, metadatas=metas, ids=ids)
-    print(f"Added {len(docs)} episodic memories.")
+    new_docs, new_ids, new_metas = [], [], []
+    inrun_ids = set()  # prevent duplicates in the same batch
+
+    for session_id, idx, role, content, when, importance, tags in iter_turns():
+        doc_id = make_id(session_id, idx, role, content, when)
+        if doc_id in existing_ids or doc_id in inrun_ids:
+            continue
+        inrun_ids.add(doc_id)
+        new_ids.append(doc_id)
+        new_docs.append(f"[{role} at {when}]: {content}")
+        new_metas.append({
+            "type": "episodic", "role": role, "timestamp": when,
+            "session_id": session_id, "importance": str(importance),
+            "tags": ", ".join(tags or [])
+        })
+
+    if new_ids:
+        episodic.add(documents=new_docs, metadatas=new_metas, ids=new_ids)
+
+    print(f"Added {len(new_ids)} new episodic memories (skipped existing).")
     try:
-        print(f"Collection count now: {episodic_collection.count()}")
+        print(f"Collection count now: {episodic.count()}")
     except Exception:
         pass
 
