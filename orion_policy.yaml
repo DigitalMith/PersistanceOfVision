@@ -42,3 +42,57 @@ ttl_days:
 budgets:
   daily_new_tokens: 30000
   per_topic_cap: 200
+
+# orion_policy.yaml  (additions)
+non_destructive: true
+allow_delete: false
+
+ingest_defaults:
+  crawl_depth: 1
+  crawl_pages_cap: 10
+  respect_robots_txt: true
+  allowed_domains: []       # will be filled from sources.allowlist by loader
+  blocked_domains: []
+  user_agent: "OrionLTM/1.0"
+  follow_pdf_links: false   # mirrors your existing flag
+
+content_filters:
+  min_chars: 32
+  max_chars: 8000
+  drop_if_contains:
+    - "(?i)password:\\s*\\S+"
+    - "(?i)api[_-]?key\\s*[:=]\\s*\\S+"
+    - "(?i)secret\\s*[:=]\\s*\\S+"
+
+pii_redaction:
+  enabled: true
+  rules:
+    - { name: email, pattern: "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[A-Za-z]{2,}", replacement: "[REDACTED_EMAIL]" }
+    - { name: phone, pattern: "(?:\\+?\\d[\\s.-]?){7,}\\d", replacement: "[REDACTED_PHONE]" }
+
+dedupe:
+  enabled: true
+  method: cosine           # honors your cosine_threshold below
+  cosine_threshold: 0.92   # pulled from your file
+
+metadata_enrichment:
+  topic_from_call: true
+  default_topic: "web"
+  source_fields: ["source_url", "source_title", "crawl_timestamp"]
+  tags: ["ltm", "rag", "web"]
+
+write:
+  collection: "orion_web_ltm"
+  duplicate_strategy: "skip_existing"
+  upsert: true
+  id_fields: ["source_url", "sha1_content"]
+
+persona:
+  collection: "orion_persona_ltm"
+  max_lines_per_run: 1000
+  drop_if_contains: ["(?i)^\\[.*\\]$"]
+
+episodic:
+  collection: "orion_episodic_ltm"
+  allowed_roles: ["user", "assistant", "system"]
+  normalize_roles: true

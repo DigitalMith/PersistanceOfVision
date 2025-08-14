@@ -18,21 +18,24 @@ except Exception as e:
     logger.error(f"[orion_ltm] import failed: {e}")
     raise
 
-persona_coll = episodic_coll = None
+persona_coll = episodic_coll = None  # kept only for backward-compat logging, not used for calls
+LTM_READY = False
 DEBUG = os.environ.get("ORION_LTM_DEBUG", "0") == "1"
 TOPK_PERSONA = int(os.environ.get("ORION_LTM_TOPK_PERSONA", "6"))
 TOPK_EPISODIC = int(os.environ.get("ORION_LTM_TOPK_EPISODIC", "8"))
 
 def setup():
     """Called by TGWUI at startup for each extension."""
-    global persona_coll, episodic_coll
-    persona_coll, episodic_coll = initialize_chromadb_for_ltm()
+    global persona_coll, episodic_coll, LTM_READY
+    # Warm Chroma + get counts for logging; collections are not used elsewhere
+    persona_coll, episodic_coll, _ = initialize_chromadb_for_ltm()
     try:
         pc = persona_coll.count()
         ec = episodic_coll.count()
     except Exception:
         pc = ec = -1
     logger.info(f"[orion_ltm] setup() → Persona={pc} Episodic={ec}")
+    LTM_READY = True
 
 def _extract_last_user_message(text: str) -> str:
     m = list(re.finditer(r"(?:^|\n)[<\[]?user[>\]]?:?\s*(.*)$", text, flags=re.IGNORECASE))
@@ -42,16 +45,23 @@ def _extract_last_user_message(text: str) -> str:
 
 def input_modifier(prompt: str, state):
     """Called right before generation; return modified prompt."""
-    if persona_coll is None:
+    
+    # --- REMOVE '\nOrion:' FROM STOP STRINGS IF PRESENT ---
+    if isinstance(state, dict):
+        stops = state.get("stop_str", [])
+        if "\nOrion:" in stops:
+            stops.remove("\nOrion:")
+    
+    if not LTM_READY:
         return prompt
+
     user_text = (state.get("user_input") if isinstance(state, dict) else None) or _extract_last_user_message(prompt)
     if not user_text:
         return prompt
 
+    # get_relevant_ltm manages its own Chroma client/collections internally
     ctx, dbg = get_relevant_ltm(
-        user_text,
-        persona_coll,
-        episodic_coll,
+        user_input=user_text,
         topk_persona=TOPK_PERSONA,
         topk_episodic=TOPK_EPISODIC,
         return_debug=True,
@@ -69,6 +79,7 @@ def input_modifier(prompt: str, state):
             f"p_top={dbg.get('persona_top', None)} e_top={dbg.get('episodic_top', None)}\n"
         )
     return new_prompt
+
 
 def output_modifier(text: str, state):
     """Optional: tag output while testing so you can *see* it’s on."""

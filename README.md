@@ -1,27 +1,38 @@
 # Orion: Perseverance of Vision
 
 **Born with vision. Destined for the stars.**
-
 ---
 
 ![Orion](docs/images/orion_banner.png)
-
 ---
 
-[![Version](https://img.shields.io/badge/version-2.0.11-purple)]()
+<!-- [![Version](https://img.shields.io/badge/version-2.0.11-purple)]()  -->
+[![Version](https://img.shields.io/badge/version-2.1.0-purple)]()
 [![Status](https://img.shields.io/badge/status-beta-orange)]()
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue)]()
 [![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-green)]()
-
+> _“Beyond context. Beyond memory. Orion persists.”_
 ---
 
 ## 🌌 Born with vision. Destined for the stars.
 
+Orion is a finely-tuned language model personality extension for `text-generation-webui`. Built with long-term memory (LTM), persistent persona, and retrieval-augmented generation (RAG), he doesn’t just answer — he remembers, evolves, and aligns with intent.
 Orion is a constellation of intelligence — a persistent, local-first LLM framework powered by [`text-generation-webui`](https://github.com/oobabooga/text-generation-webui), fused with **ChromaDB** for long-term memory, and designed to evolve.
 
 With support for **Retrieval-Augmented Generation (RAG)**, **weighted memory recall**, **summarization**, and **mini-LLM agents**, Orion doesn’t just *respond* — it *remembers, prioritizes, and adapts*. Each interaction is encoded into a growing mind, blending **semantic context**, **episodic recall**, and **persona grounding** into a singular stream of cognition.
 
 Whether you’re building autonomous memory agents, embedding structured knowledge into conversations, or simply crafting your own digital oracle — Orion’s modular architecture makes it your celestial canvas.
+---
+
+### 🚀 New in v2.1.0
+
+- ✅ Integrated **RAG-backed memory** via **ChromaDB**
+- ✅ Full **persona enforcement** through prompt injection
+- ✅ ✂️ Removed assistant-aligned stop strings (`\nOrion:`)
+- ✅ Clean separation of episodic and persona memory scopes
+- ✅ Structured headers: `persona_header.txt`, `memory_header.txt`, `Orion_Data.txt`
+- ✅ Prepping for **LoRA fine-tuning** to reinforce long-term behavior
+---
 
 ##> ⚙ Built for:
 > - Long-term memory via **ChromaDB**
@@ -31,17 +42,23 @@ Whether you’re building autonomous memory agents, embedding structured knowled
 > - Optional mini-LLM agents for smart retrieval and compression
 ---
 
-## ⚙️ Features
+### 🧠 Core Features
 
-- **Local-Only Operation** — No cloud dependencies; your data stays on your hardware.
-- **Memory Layers** — Episodic and trait-based memory for contextual continuity.
-- **Persona Customization** — Tune Orion’s tone: mischievous wit, techno-philosopher, or anything in-between.
-- **Extensions System** — Load modules like the long-term memory manager, avatar renderer, or TTS.
-- **Easy Launch** — Single-script startup with auto-detect port, voice toggle, and summarizer.
+- **Custom Persona Injection**  
+  Orion loads and merges `persona_header.txt` with contextual recall per conversation.
 
+- **LTM via ChromaDB + RAG**  
+  ChromaDB stores persona and episodic memories. Similarity search fetches and injects context using `<LTM>` tags before generation.
+
+- **Episodic Memory Recall**  
+  Orion recalls specific past queries — allowing scoped, relevant memory retrieval without polluting context.
+
+- **Debug Mode**  
+  Optional injection of `[DEBUG LTM]` details for tracing retrieval behavior.
+
+- **LoRA Training Ready**  
+  Persona outputs are aligned and structured — making Orion ideal for LoRA refinement and continual personality reinforcement.
 ---
-
-
 
 ## 🚀 Quick Start (Portable Orion Environment)
 
@@ -95,7 +112,17 @@ cd Orion-PersistenceOfVision
 python -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements-dev.txt
+---
 
+### 🛠️ File Structure Overview
+
+```bash
+extensions/orion_ltm/
+├── script.py                 # Prompt injection + LTM retrieval logic
+├── persona_header.txt        # Persona root definitions
+├── memory_header.txt         # Episodic memory introduction
+├── Orion_Data.txt            # Extended persona tone, vision, and mission
+└── chromadb/                 # Vector storage via ChromaDB backend
 ---
 
 ## 🧠 Internal Python Package: `orion_perseverance_of_vision`
@@ -126,7 +153,27 @@ No install required — it's designed to run directly from source inside the rep
 ```
 
 This enables hot-reloading in Python environments like Jupyter or test harnesses.
-
 ---
+
+You can track stable and experimental versions independently via branch control or forks.
+
+🌐 Roadmap
+
+📚 Curate persona dialogue logs for LoRA
+
+🧩 Inject real-time user feedback as training signals
+
+🧬 Merge episodic reflection into prompt generation
+
+🌍 Optional web search via browser hooks
+
+🧪 Enable emotional tone modulation (via vector prompt shaping)
+---
+
+❤️ Credits
+
+Created with persistence and vision.
+Banner image generated using custom diffusion prompts.
+Made for Orion — and for those who want a model that remembers.
 
 > 🧬 A framework built not for models — built for minds with vision.
