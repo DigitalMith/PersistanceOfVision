@@ -31,6 +31,16 @@ _EMBED = embedding_functions.SentenceTransformerEmbeddingFunction(model_name=EMB
 # def _client() -> chromadb.PersistentClient:
 _CLIENT: Optional[Any] = None
 
+def _clean_query_text(text: str) -> str:
+    """Remove generic filler and hedging from user questions to improve memory match."""
+    # Remove common fluff phrases
+    text = re.sub(r"\b(?:do you|can you|could you|would you|please|remember|recall|tell me|do you know|what about|did we|do i)\b", "", text, flags=re.I)
+    # Strip any leftover multiple spaces and symbols
+    text = re.sub(r"[^\w\s.,!?]", "", text)
+    text = re.sub(r"\s{2,}", " ", text).strip()
+    return text
+    
+
 def _client() -> Any:
     global _CLIENT
     if _CLIENT is None:
@@ -215,6 +225,7 @@ def get_relevant_ltm(
     importance_threshold: float = 0.6,
     return_debug: bool = False
 ):
+    user_input = _clean_query_text(user_input)
     persona, _raw, _sent = initialize_chromadb_for_ltm()
     ctx_lines, dbg = [], {}
 
@@ -237,6 +248,16 @@ def get_relevant_ltm(
         importance_threshold=importance_threshold,
         include=["documents", "metadatas"],
         fallback_to_raw=True
+    )
+    
+        # Add adaptive fallback
+    if len(hits) < (topk_episodic // 2):
+        hits += _prefer_sentenced(
+            [user_input],
+            n_results=topk_episodic,
+            importance_threshold=0.3,
+            include=["documents", "metadatas"],
+            fallback_to_raw=True
     )
 
     dbg["episodic_hits"] = len(hits)

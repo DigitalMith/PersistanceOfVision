@@ -69,7 +69,7 @@ def input_modifier(prompt: str, state):
     if not ctx:
         return prompt
 
-    ltm_block = "<LTM>\n" + ctx.strip() + "\n</LTM>\n"
+    ltm_block = f"<LTM query='{user_text.strip()}'>\n" + ctx.strip() + "\n</LTM>\n"
     new_prompt = ltm_block + prompt
 
     if DEBUG and dbg:
