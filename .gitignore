@@ -67,3 +67,10 @@ installer_files\conda/
 *.7z
 *.zip
 *.cache/
+
+# ──────────────────────────────
+# Orion ReSeed Essentials (force-include)
+# ──────────────────────────────
+!ReSeed/
+!ReSeed/*.txt
+!ReSeed/*.jsonl
