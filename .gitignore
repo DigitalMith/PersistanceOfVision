@@ -1,69 +1,55 @@
-# ──────────────────────────────
-# 🧠 Orion Git Ignore Template
-# ──────────────────────────────
-
-# 🗄️ Local Databases (e.g. Chroma)
+# Ignore databases, models, large artifacts
 *.sqlite3
-
-# 🧠 Models, Tokenizers & Artifacts
 *.bin
 *.pt
 *.pkl
 *.tar.gz
 *.whl
-
-# 🏗️ Build and Installer Artifacts
-*.exe
-*.dll
-*.pyd
-.installer_state.json
-installer_files/
-
-# 🎨 Media Assets (should be externally stored or referenced)
-*.png
-*.jpg
-*.jpeg
-*.gif
-
-# 🧹 Python Cache & Temp Files
-__pycache__/
-*.pyc
-*.log
-*.tmp
-
-# 🧠 Project Local Data
-user_data/
-outputs/
-models/
-characters/
-extensions/
-
-# 🧑‍💻 IDE & Editor Settings
-.vscode/
-.idea/
-
-# 🧾 System-Specific Files
-.DS_Store
-Thumbs.db
-
-# Virtual environments
-venv/
-
-# Installer and package state files
-installer_files/conda/pkgs/urls.txt
-
-# Orion LTM and backups (never commit)
-user_data/chroma_db/
-backups/ltm/
-*.jsonl
-*.sqlite
-# Orion / TGWUI big artifacts
-user_data\models/
-user_data\chroma_db/
-installer_files\env/
-installer_files\conda/
 *.gguf
 *.safetensors
 *.7z
 *.zip
 *.cache/
+
+# Ignore build & installer artifacts
+*.exe
+*.dll
+*.pyd
+.installer_state.json
+installer_files/
+installer_files\env/
+installer_files\conda/
+
+# Ignore images & logs
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.log
+*.tmp
+
+# Ignore Python cache
+__pycache__/
+*.pyc
+
+# Ignore editor/OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Ignore venv
+venv/
+venv-orion/
+
+# Ignore data outputs but **allow seed configs**
+user_data/*
+!user_data/memory_seed/
+!user_data/memory_seed/*.jsonl
+
+# Ignore extensions generally but **allow Orion**
+extensions/*
+!extensions/orion_ltm/
+
+# Ignore LTM backups
+backups/ltm/

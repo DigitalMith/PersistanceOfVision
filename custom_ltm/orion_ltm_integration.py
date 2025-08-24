@@ -1,30 +1,23 @@
-# custom_ltm/orion_ltm_integration.py
-"""
-Safe LTM integration:
-- persistent on-disk Chroma (no reset)
-- RAW episodic + SENTENCED enrichment (upsert, idempotent)
-- retrieval prefers SENTENCED (importance-filtered), falls back to RAW
-- persona included
-"""
 import os, time, hashlib
 from datetime import datetime
 from typing import Any, Optional, Dict, List
 import re
-import chromadb
-from chromadb.config import Settings
-from chromadb.errors import InvalidCollectionException
-from chromadb.utils import embedding_functions
+
+from custom_ltm.chroma_utils import get_client, get_collection, add_documents, query_texts
+from chromadb.utils import embedding_functions  # keep if you pass an embedding fn to collections
+# Removed: InvalidCollectionException doesn't exist in Chroma >=1.0
+InvalidCollectionException = Exception  # temporary general catch
+
 
 # --- Config (env-aware) ---
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 CHROMA_DB_PATH = os.environ.get("CHROMA_DB_PATH", os.path.join(ROOT, "user_data", "chroma_db"))
-EMBED_MODEL = os.environ.get("ORION_EMBED_MODEL", "all-MiniLM-L6-v2")
+EMBED_MODEL = os.environ.get("ORION_EMBED_MODEL", "all-mpnet-base-v2")
 
 COLL_PERSONA        = os.environ.get("ORION_PERSONA_COLLECTION",        "orion_persona_ltm")
 COLL_EPISODIC_RAW   = os.environ.get("ORION_EPISODIC_COLLECTION",       "orion_episodic_ltm")
 COLL_EPISODIC_SENT  = os.environ.get("ORION_EPISODIC_SENT_COLLECTION",  "orion_episodic_sent_ltm")
 
-_SETTINGS = Settings(anonymized_telemetry=False, allow_reset=False)
 # _CLIENT: chromadb.PersistentClient | None = None
 _EMBED = embedding_functions.SentenceTransformerEmbeddingFunction(model_name=EMBED_MODEL)
 
@@ -44,7 +37,7 @@ def _clean_query_text(text: str) -> str:
 def _client() -> Any:
     global _CLIENT
     if _CLIENT is None:
-        _CLIENT = chromadb.PersistentClient(path=CHROMA_DB_PATH, settings=_SETTINGS)
+        _CLIENT = get_client(CHROMA_DB_PATH)
         try:
             _CLIENT.list_collections()
         except Exception as e:
@@ -55,11 +48,15 @@ def _client() -> Any:
 def _get_or_create(name: str, *, cosine: bool = False):
     c = _client()
     try:
-        return c.get_collection(name=name, embedding_function=_EMBED)
-    except InvalidCollectionException:
-        meta = {"hnsw:space": "cosine"} if cosine else None
-        return c.create_collection(name=name, embedding_function=_EMBED, metadata=meta)
-
+        return c.get_or_create_collection(
+            name=name,
+            embedding_function=_EMBED,
+            metadata={"hnsw:space": "cosine"} if cosine else None
+        )
+    except Exception as e:
+        print(f"[ERROR] Failed to get/create collection '{name}': {e}")
+        raise
+    
 # ---- Prefer-Sentenced retrieval ----
 def _flatten_query(res) -> List[Dict[str, Any]]:
     out: List[Dict[str, Any]] = []
@@ -82,38 +79,39 @@ def _flatten_query(res) -> List[Dict[str, Any]]:
     return out
 
 def _prefer_sentenced(
-    query_texts: List[str],
+    query_texts_list: List[str],
     n_results: int,
-    importance_threshold: float = 0.6,
+    importance_threshold: float = 0.1,
     include=("documents", "metadatas"),
     fallback_to_raw: bool = True
 ) -> List[Dict[str, Any]]:
     sent = _get_or_create(COLL_EPISODIC_SENT, cosine=True)
     raw  = _get_or_create(COLL_EPISODIC_RAW)
 
-    sent_res = sent.query(
-        query_texts=query_texts,
-        n_results=n_results,
+    # Sentenced first, with importance filter
+    sent_res = query_texts(
+        sent,
+        query_texts_list,
+        top_k=n_results,
         where={"importance": {"$gte": importance_threshold}},
-        include=list(include),
     )
     hits = _flatten_query(sent_res)
     seen = {h["id"] for h in hits}
     need = max(0, n_results - len(hits))
 
+    # Optional fallback to raw if not enough
     if fallback_to_raw and need > 0:
-        raw_res = raw.query(
-            query_texts=query_texts,
-            n_results=n_results * 2,
-            include=list(include),
+        raw_res = query_texts(
+            raw,
+            query_texts_list,
+            top_k=n_results * 2,  # over-fetch, then trim
         )
         pool = [r for r in _flatten_query(raw_res) if r["id"] not in seen]
         hits.extend(pool[:need])
 
-    # sort once is enough
+    # Sort and dedupe
     hits.sort(key=lambda x: (x["query_index"], x["distance"] if x.get("distance") is not None else 9e9))
 
-    # --- dedupe by normalized document text ---
     unique, seen_docs = [], set()
     for h in hits:
         doc = (h.get("document") or "").strip().lower()
@@ -124,6 +122,7 @@ def _prefer_sentenced(
         unique.append(h)
 
     return unique[:n_results]
+
 
     
 # ---- Sentencer (lightweight heuristics) ----
@@ -225,17 +224,16 @@ def get_relevant_ltm(
     importance_threshold: float = 0.6,
     return_debug: bool = False
 ):
+    if importance_threshold < 0.5:
+        print(f"[DEBUG WARNING] importance_threshold is set to {importance_threshold}. Did you mean to leave it that low?")
     user_input = _clean_query_text(user_input)
     persona, _raw, _sent = initialize_chromadb_for_ltm()
     ctx_lines, dbg = [], {}
 
     # --- Persona section ---
-    pres = persona.query(query_texts=[user_input], n_results=max(1, topk_persona),
-                         include=["documents", "distances"])
+    pres = query_texts(persona, [user_input], top_k=max(1, topk_persona))
     p_docs = pres.get("documents", [[]])[0] if pres else []
     p_dists = pres.get("distances", [[]])[0] if pres else []
-    dbg["persona_hits"] = len(p_docs)
-    dbg["persona_top"] = p_dists[0] if p_dists else None
 
     for doc in p_docs:
         if doc:
@@ -249,8 +247,6 @@ def get_relevant_ltm(
         include=["documents", "metadatas"],
         fallback_to_raw=True
     )
-    
-        # Add adaptive fallback
     if len(hits) < (topk_episodic // 2):
         hits += _prefer_sentenced(
             [user_input],
@@ -258,7 +254,7 @@ def get_relevant_ltm(
             importance_threshold=0.3,
             include=["documents", "metadatas"],
             fallback_to_raw=True
-    )
+        )
 
     dbg["episodic_hits"] = len(hits)
     dbg["episodic_top"] = (hits[0].get("distance") if hits and isinstance(hits[0], dict) else None)
@@ -267,9 +263,10 @@ def get_relevant_ltm(
         doc = h.get("document") or ""
         meta = h.get("metadata") or {}
         tag = "SENTENCE" if meta.get("type") == "episodic_sentence" else "EPISODIC"
-        imp = meta.get("importance")
-        tags = (meta.get("tags_csv") or "").split("|")
+        imp = meta.get("importance", "n/a")
+        tags = meta.get("tags", meta.get("tags_csv", "")).split(",")
         tag_preview = ",".join(tags[:3]) if tags else ""
+        print(f"[DEBUG] Retrieved → {doc[:80]}... | imp={imp}, tags={tag_preview}")
         ctx_lines.append(f"[{tag} imp={imp} tags={tag_preview}] {doc}")
 
     ctx = "\n".join(ctx_lines).strip()
@@ -311,12 +308,22 @@ def _add_turn(role: str, text: str, session_id: str, timestamp: Optional[float])
         s_ids.append(sid)
         s_docs.append(p["text"])
         s_meta.append({
-            "type":"episodic_sentence", "parent_id": raw_id,
-            "role": p["role"], "session_id": p["session_id"], "timestamp": p["timestamp"],
-            "tags": p["tags"], "keywords": p["keywords"],
-            "sentiment": p["sentiment"], "emotion": p["emotion"], "importance": p["importance"],
+            "type": "episodic_sentence",
+            "parent_id": raw_id,
+            "role": p["role"],
+            "session_id": p["session_id"],
+            "timestamp": p["timestamp"],
+            "tags": ", ".join(p["tags"]),
+            "keywords": ", ".join(p["keywords"]),
+            "sentiment": p["sentiment"],
+            "emotion": p["emotion"],
+            "importance": p["importance"],
             "source": "sentencer:v1"
         })
     if s_ids:
+        print(f"[DEBUG] Writing {len(s_ids)} episodic memory entries...")
+        for doc, meta in zip(s_docs, s_meta):
+            print(f"[MEMORY ENTRY] {doc[:60]}... | Meta: {meta}")
+
         sent.upsert(ids=s_ids, documents=s_docs, metadatas=s_meta)
     return {"raw_id": raw_id, "sentenced_ids": s_ids}

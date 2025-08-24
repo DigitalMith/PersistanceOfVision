@@ -3,8 +3,8 @@ import os, time, hashlib
 from pathlib import Path
 from typing import Iterable, List, Dict, Any
 
-import chromadb
-from chromadb.config import Settings
+from custom_ltm.chroma_utils import get_client, get_collection, add_documents, query_texts
+# keep this ONLY if you actually use it later in the file:
 from chromadb.utils import embedding_functions
 
 # --- Paths & collections (safe defaults)
@@ -21,8 +21,7 @@ EMBED = embedding_functions.SentenceTransformerEmbeddingFunction(
 
 # --- Local helpers
 def _client():
-    # Persistent on-disk DB; loads/saves automatically. :contentReference[oaicite:0]{index=0}
-    return chromadb.PersistentClient(path=CHROMA_DB_PATH, settings=Settings(anonymized_telemetry=False))
+    return get_client(CHROMA_DB_PATH)
 
 def _get_or_create(name: str, cosine: bool = False):
     c = _client()

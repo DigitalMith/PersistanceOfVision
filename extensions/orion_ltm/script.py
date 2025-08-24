@@ -18,7 +18,8 @@ except Exception as e:
     logger.error(f"[orion_ltm] import failed: {e}")
     raise
 
-persona_coll = episodic_coll = None  # kept only for backward-compat logging, not used for calls
+# persona_coll = episodic_coll = None  # kept only for backward-compat logging, not used for calls
+print("[orion_ltm] Manual seeding in place — skipping extension init.")
 LTM_READY = False
 DEBUG = os.environ.get("ORION_LTM_DEBUG", "0") == "1"
 TOPK_PERSONA = int(os.environ.get("ORION_LTM_TOPK_PERSONA", "6"))
