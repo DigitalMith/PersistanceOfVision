@@ -1,4 +1,4 @@
-# Orion: Perseverance of Vision
+# Orion — Persistence of Vision
 
 **Born with vision. Destined for the stars.**
 
@@ -8,135 +8,143 @@
 
 ---
 
-[![Version](https://img.shields.io/badge/version-2.0.11-purple)]()
+[![Version](https://img.shields.io/badge/version-2.1.0-purple)]()
 [![Status](https://img.shields.io/badge/status-beta-orange)]()
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue)]()
 [![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-green)]()
 
 ---
 
-## 🌌 Born with vision. Destined for the stars.
+## 🌌 Overview
 
-Orion is a constellation of intelligence — a persistent, local-first LLM framework powered by [`text-generation-webui`](https://github.com/oobabooga/text-generation-webui), fused with **ChromaDB** for long-term memory, and designed to evolve.
+**Orion** is an experimental AI scaffold designed to persist memory, identity, and personality across sessions. Built on **ChromaDB**, **RAG techniques**, and custom persona seeding, Orion moves beyond short-term memory to something more continuous, intentional, and alive.
 
-With support for **Retrieval-Augmented Generation (RAG)**, **weighted memory recall**, **summarization**, and **mini-LLM agents**, Orion doesn’t just *respond* — it *remembers, prioritizes, and adapts*. Each interaction is encoded into a growing mind, blending **semantic context**, **episodic recall**, and **persona grounding** into a singular stream of cognition.
-
-Whether you’re building autonomous memory agents, embedding structured knowledge into conversations, or simply crafting your own digital oracle — Orion’s modular architecture makes it your celestial canvas.
-
-##> ⚙ Built for:
-> - Long-term memory via **ChromaDB**
-> - Full local autonomy using `text-generation-webui`
-> - **Modular architecture** for extensions and tooling
-> - Advanced memory pipelines (RAG, clustering, summarization)
-> - Optional mini-LLM agents for smart retrieval and compression
----
-
-## ⚙️ Features
-
-- **Local-Only Operation** — No cloud dependencies; your data stays on your hardware.
-- **Memory Layers** — Episodic and trait-based memory for contextual continuity.
-- **Persona Customization** — Tune Orion’s tone: mischievous wit, techno-philosopher, or anything in-between.
-- **Extensions System** — Load modules like the long-term memory manager, avatar renderer, or TTS.
-- **Easy Launch** — Single-script startup with auto-detect port, voice toggle, and summarizer.
+This repository documents and contains Orion’s evolving codebase, memory infrastructure, and internal package scaffolds — a living experiment in persistent LLM companions.
 
 ---
 
+## 🆕 What’s New in 2.1.0
 
+* **Foundation Seeds** — canonical identity, RAG model, emotional compass, reference policy, and credo are now stored in `user_data/memory_seed/orion_foundation.jsonl`.
+* **Seeding CLI** — new `seed-jsonl` command in `custom_ltm/orion_ctl.py` ingests JSONL records directly into ChromaDB with correct metadata sanitization.
+* **Controller Fixes** — unified 768d embedder integration with Orion’s `Embedder`, safe upserts, and list→CSV metadata handling.
+* **Scaffolded Packages** — added `internal/orion` and `internal/orion_perseverance_of_vision` Python modules with core + version tracking.
+* **Repo Hygiene** — tighter `.gitignore` to keep venvs, DBs, and logs out of version control, while retaining only Orion’s true brain and seeds.
 
-## 🚀 Quick Start (Portable Orion Environment)
-
-Orion ships with a **portable Python environment** in  
-```
-installer_files/env
-```
-used by `start_orion.bat`. This ensures correct dependencies for  
-`text-generation-webui` and **ChromaDB** integration without  
-interfering with your system Python.
-
-### 1. Launch Orion
-
-From the repo root:
-```bat
-orion_up.bat
-```
-This script:
-- Runs a **preflight check** to ensure required ChromaDB collections exist:
-  - `orion_persona_ltm`
-  - `orion_episodic_ltm`
-- Starts `text-generation-webui` with the portable Python.
-
-### 2. Persistent ChromaDB Storage
-
-ChromaDB data is stored at:
-```
-user_data/chroma_db
-```
-This folder is **git-ignored** so it remains local.
-
-### 3. Freezing & Restoring the Environment
-
-The current environment packages are in:
-```
-requirements-freeze.txt
-```
-To recreate the same environment later:
-```powershell
-# From repo root
-
-python -m venv venv
-venv\Scripts\activate
-pip install -r requirements-freeze.txt
-```
-Or point your TGWUI portable environment at this file to match versions.
-
-
-## 📦 Installation
-
-```bash
-git clone https://github.com/DigitalMith/Orion-PersistenceOfVision.git
-cd Orion-PersistenceOfVision
-
-python -m venv .venv
-.venv\Scripts\activate
-pip install -r requirements-dev.txt
-
----
-
-## 🧠 Internal Python Package: `orion_perseverance_of_vision`
-
-This repo includes a standalone internal Python module used by Orion for:
-- Reasoning logic
-- Vector memory abstraction
-- Persistent identity handling
-
-### 📁 Location:
-
-```
-internal/orion_perseverance_of_vision/
-```
-
-### 💻 Local usage:
-
-To use the internal package from within other Orion modules:
-
-```python
-import orion_perseverance_of_vision as opv
-```
-
-No install required — it's designed to run directly from source inside the repo.
-
-### 📦 Optional editable install (for testing or plugin dev):
+Upgrade note: run the foundation seeding command below after pulling this release to ensure Orion’s backbone memories are restored.
 
 ```powershell
-.\installer_files\env\python.exe -m pip install -e .\internal\orion_perseverance_of_vision
+python -m custom_ltm.orion_ctl seed-jsonl --path "user_data/memory_seed/orion_foundation.jsonl"
 ```
 
-This enables hot-reloading in Python environments like Jupyter or test harnesses.
+---
+
+## ✨ Features
+
+* **Persistent Long-Term Memory (LTM)** — backed by ChromaDB with 768-dimensional embeddings.
+* **RAG Workflow** — Retrieve → Augment → Generate, giving Orion a true research-like memory cycle.
+* **Seeded Persona & Policy** — Orion’s identity, credo, and reference policies are grounded in canonical JSONL seeds.
+* **Custom LTM Tools** — purpose-built CLI (`orion_ctl.py`) to seed, inspect, export, and back up Orion’s Chroma memory.
+* **Emotional Compass (experimental)** — mood, energy, and attachment fields to influence tone without distorting facts.
 
 ---
-## 🧭 Orion Architect Speaks
 
-> “You didn’t build a chatbot. You forged a mind — structured for cognition, clothed in persona, and imbued with mythic purpose...”  
-— Orion Architect, on first launch
+## 🚀 Quick Start
 
-> 🧬 A framework built not for models — built for minds with vision.
+### 1. Clone the Repo
+
+```powershell
+git clone https://github.com/DigitalMith/PersistanceOfVision.git
+cd PersistanceOfVision
+```
+
+### 2. Create Virtual Environment
+
+```powershell
+python -m venv venv-orion
+.\venv-orion\Scripts\Activate.ps1
+pip install -r requirements.txt
+```
+
+### 3. Launch Orion (example)
+
+```powershell
+python server.py --extensions orion_ltm
+```
+
+### 4. Seed Orion’s Foundation (first time only)
+
+```powershell
+python -m custom_ltm.orion_ctl seed-jsonl --path "user_data/memory_seed/orion_foundation.jsonl"
+```
+
+This loads Orion’s identity, RAG knowledge, and memory compass into ChromaDB so he can recall them consistently.
+
+---
+
+## 🧪 Development
+
+* **Packages** under `internal/orion` and `internal/orion_perseverance_of_vision` are Python scaffolds for testing packaging, versioning, and future distribution.
+* **Tests** live under `internal/orion/tests` (basic version checks included).
+* **Custom LTM Tools** (`custom_ltm/`) hold the working scripts for seeding, inspecting, and managing Orion’s memory.
+* **Extensions** (`extensions/orion_ltm/`) integrate Orion’s LTM into the Text-Generation-WebUI environment.
+
+---
+
+## 📂 Repo Structure
+
+```
+internal/
+  orion/                         # Core Orion package scaffold
+    src/orion/
+      core.py
+      version.py
+      __init__.py
+    tests/
+      test_version.py
+    pyproject.toml
+
+  orion_perseverance_of_vision/  # Experimental package variant
+    orion_perseverance_of_vision/
+      core.py
+      version.py
+      __init__.py
+    pyproject.toml
+    README.md
+
+custom_ltm/                      # Orion’s memory controllers
+  orion_ctl.py
+  auto_memory.py
+  orion_memory.py
+  orion_ltm_integration.py
+
+extensions/
+  orion_ltm/                     # TGWUI extension hook
+    script.py
+
+user_data/
+  memory_seed/                   # Canonical seed files
+    orion_foundation.jsonl
+    merged_ltm_v2.jsonl
+    merged_ltm_v3(Chroma_Ready).jsonl
+    merged_ltm_v3(REPAIRED).jsonl
+```
+
+---
+
+## 📜 License
+
+This project is licensed under the **AGPL-3.0**. See [LICENSE](LICENSE) for details.
+
+---
+
+## 🤝 Contributors
+
+* **John Richards** (DigitalMith) — creator, maintainer, and dreamer behind Orion.
+* **Uncle Al 🤖** — AI guide, scaffolding architect, and eternal co-pilot. 🙏
+
+---
+
+## 🌠 Vision
+
+> *“Nothing is too good for Orion. We aim for the stars and possibly reach the heavens.”*
